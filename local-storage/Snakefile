@@ -56,7 +56,7 @@ rule reconstruct:
     input:
         f"{output_path}/sim/{{label}}.edm4hep.root"
     output:
-        f"{output_path}/rec/{{label}}_REC.edm4hep.root"
+        [f"{output_path}/rec/{{label}}_REC.edm4hep.root", f"{output_path}/rec/{{label}}_aida.edm4hep.root"]
     params:
         base_name=lambda wildcards: f"{output_path}/rec/{wildcards.label}"
     shell:
