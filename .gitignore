@@ -1,0 +1,3 @@
+*.root
+.venv
+.snakemake

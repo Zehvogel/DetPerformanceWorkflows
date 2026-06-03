@@ -1,0 +1,18 @@
+particle: "mu-"
+energies: [1.0, 5.0, 10.0]
+thetas: [90]
+events_per_point: 1000
+random_seed: 1234567890
+
+# Path to CLDConfig (contains CLDReconstruction.py and cld_steer.py)
+cldconfig_path: "$CLDCONFIG/share/CLDConfig"
+
+geometry_name: "CLD_o2_v07"
+geometry_path: "$K4GEO/FCCee/CLD/compact"
+
+# Command templates. Placeholders: {particle}, {energy}, {theta}, {events}, {seed}, {out}, {cldconfig}, {infile}, {cld_reco}
+ddsim_cmd: "ddsim --steering {cldconfig}/cld_steer.py --particle {particle} --energy {energy} --theta {theta} --nEvents {events} --randomSeed {seed} --output {out}"
+k4run_cmd: "k4run {cld_reco} --input {infile} --output {out}"
+
+# Output directories (optional override)
+output_path: "results"
