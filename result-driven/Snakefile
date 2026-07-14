@@ -1,0 +1,65 @@
+configfile: "config.yaml"
+
+
+rule all:
+    input:
+        [f"<results>/plots/{plot}" for plot in config.get("plot_list", [])]
+
+
+rule neutral_resolution_plot_E:
+    output:
+        "<results>/plots/neutral_resolution_plot_{particle}_{n_events}N.pdf"
+    input:
+        [f"<resources>/ntuples/{{particle}}_{energy}_cosTheta_{{n_events}}N.root" for energy in config["neutral_resolution_plot_E"]["energies"]]
+    # TODO: add stuff that actually runs
+
+
+rule ntuple:
+    output:
+        "<resources>/ntuples/{particle}_{energy}_cosTheta_{n_events}N.root"
+    input:
+        "<resources>/reco/{particle}_{energy}_cosTheta_{n_events}N_REC.edm4hep.root"
+    # TODO: add stuff that actually runs
+    shell:
+        f"""
+k4run {config["n_tuple_config"]} --inputFiles {{input}} --output {{output}} -n -1
+        """
+
+
+rule reco:
+    output:
+        "<resources>/reco/{particle}_{energy}_cosTheta_{n_events}N_REC.edm4hep.root"
+    input:
+        "<resources>/sim/{particle}_{energy}_cosTheta_{n_events}N.edm4hep.root"
+    params:
+        base_name=lambda wildcards, output: output[0].removesuffix("_REC.edm4hep.root")
+    shell:
+        # FIXME: of course pandora only runs from the one specific directory so need to do a dirty workaround here :(
+#         f"""
+# k4run {config["reco_config_path"]} --inputFiles {{input}} --outputBasename {{params.base_name}} -n -1
+#         """
+        f"""
+pushd {config["reco_run_path"]}
+k4run {config["reco_config_name"]} --inputFiles {{input}} --outputBasename {{params.base_name}} -n -1
+popd
+        """
+
+
+rule sim:
+    output:
+        "<resources>/sim/{particle}_{energy}_cosTheta_{n_events}N.edm4hep.root"
+    shell:
+        # TODO: make introduce a geometry name to look up the geometry path from a dict and use the geometry name also as a parameter so that it is possible to generate geometry comparison plots with this
+        f"""
+ddsim --compactFile {config["geometry_path"]} \
+      --outputFile {{output}} \
+      --steeringFile {config["steering_path"]} \
+      --numberOfEvents {{wildcards.n_events}} \
+      --enableGun \
+      --gun.particle={{wildcards.particle}} \
+      --gun.distribution="cos(theta)"  \
+      --gun.energy={{wildcards.energy}}*GeV \
+      --crossingAngleBoost=0 \
+      --random.seed 1234567890
+        """
+        # random seed etc. can be made configurable later

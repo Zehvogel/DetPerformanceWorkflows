@@ -1,0 +1,18 @@
+neutral_resolution_plot_E:
+  energies: [5., 10., 20., 50., 100.]
+
+plot_list: ["neutral_resolution_plot_gamma_1000N.pdf"]
+
+pathvars:
+  results: "/home/lreichen/work/DetPerformanceWorkflows/result-driven"
+  resources: "/home/lreichen/work/DetPerformanceWorkflows/result-driven"
+
+geometry_path: "$K4GEO/FCCee/CLD/compact/CLD_o2_v07/CLD_o2_v07.xml"
+steering_path: "$CLDCONFIG/share/CLDConfig/cld_steer.py"
+
+# FIXME: once pandora can run from anywhere get rid of this
+# reco_config_path: "$CLDCONFIG/share/CLDConfig/CLDReconstruction.py"
+reco_run_path: "$CLDCONFIG/share/CLDConfig/"
+reco_config_name: "CLDReconstruction.py"
+
+n_tuple_config: "/home/lreichen/work/k4Performance/PFlowValidation/options/runPFONTuple.py"
