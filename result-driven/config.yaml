@@ -1,7 +1,11 @@
 neutral_resolution_plot_E:
   energies: [5., 10., 20., 50., 100.]
+  n_bins: 30
 
-plot_list: ["neutral_resolution_plot_gamma_1000N.pdf"]
+plot_list: [
+  "gamma_1000N/neutral_energy_resolution.pdf",
+  "kaon0L_1000N/neutral_energy_resolution.pdf",
+  ]
 
 pathvars:
   results: "/home/lreichen/work/DetPerformanceWorkflows/result-driven"

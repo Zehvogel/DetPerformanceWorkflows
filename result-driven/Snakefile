@@ -1,3 +1,6 @@
+from pathlib import Path
+
+
 configfile: "config.yaml"
 
 
@@ -8,10 +11,25 @@ rule all:
 
 rule neutral_resolution_plot_E:
     output:
-        "<results>/plots/neutral_resolution_plot_{particle}_{n_events}N.pdf"
+        "<results>/plots/{particle}_{n_events}N/neutral_energy_resolution.pdf"
     input:
         [f"<resources>/ntuples/{{particle}}_{energy}_cosTheta_{{n_events}}N.root" for energy in config["neutral_resolution_plot_E"]["energies"]]
-    # TODO: add stuff that actually runs
+    # FIXME: there must be a better way to handle this!
+    params:
+        input_path=lambda wildcards, input: Path(input[0]).parent,
+        output_path=lambda wildcards, output: Path(output[0]).parent
+    shell:
+        """
+python plots.py \
+    --input_path {params.input_path} \
+    --output_path {params.output_path} \
+    --particle {wildcards.particle} \
+    --energies {config[neutral_resolution_plot_E][energies]} \
+    --n_events {wildcards.n_events} \
+    --n_bins {config[neutral_resolution_plot_E][n_bins]} \
+    --n_threads 1 \
+    --batch
+        """
 
 
 rule ntuple:
