@@ -4,7 +4,7 @@ from pathlib import Path
 
 configfile: "config.yaml"
 
-particle = config.get("particle", "mu-")
+particles = config.get("particle", [])
 energies = config.get("energies", [])
 thetas = config.get("thetas", [])
 events = config.get("events_per_point", 100)
@@ -15,7 +15,7 @@ geometry_path = config.get("geometry_path", "")
 output_path = Path(config["output_path"]).absolute()
 
 points = []
-for e, theta in product(energies, thetas):
+for particle, e, theta in product(particles, energies, thetas):
     points.append({
         "energy": f"{e}*GeV",
         "theta": f"{theta}*degree",
@@ -32,7 +32,8 @@ rule all:
 
 rule simulate:
     output:
-        f"{output_path}/sim/{{label}}.edm4hep.root"
+        # TODO: make geometry_name also a wildcard in the future
+        f"{output_path}/sim/{geometry_name}/{{label}}.edm4hep.root"
     params:
         energy=lambda wildcards: LABEL_MAP[wildcards.label]["energy"],
         theta=lambda wildcards: LABEL_MAP[wildcards.label]["theta"],
@@ -54,9 +55,9 @@ ddsim --compactFile {geometry_path}/{geometry_name}/{geometry_name}.xml \
 
 rule reconstruct:
     input:
-        f"{output_path}/sim/{{label}}.edm4hep.root"
+        f"{output_path}/sim/{geometry_name}/{{label}}.edm4hep.root"
     output:
-        [f"{output_path}/rec/{{label}}_REC.edm4hep.root", f"{output_path}/rec/{{label}}_aida.edm4hep.root"]
+        [f"{output_path}/rec/{geometry_name}/{{label}}_REC.edm4hep.root", f"{output_path}/rec/{{label}}_aida.edm4hep.root"]
     params:
         base_name=lambda wildcards: f"{output_path}/rec/{wildcards.label}"
     shell:
