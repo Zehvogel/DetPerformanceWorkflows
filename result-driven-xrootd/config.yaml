@@ -9,7 +9,10 @@ plot_list: [
 
 pathvars:
   results: "/home/lreichen/work/DetPerformanceWorkflows/result-driven-xrootd"
-  resources: "root://eosuser.cern.ch//eos/user/l/lreichen/DetPerformanceWorkflows/result-driven-test"
+  # resources: "root://eosuser.cern.ch//eos/user/l/lreichen/DetPerformanceWorkflows/result-driven-test"
+  resources: "eosuser.cern.ch//eos/user/l/lreichen/DetPerformanceWorkflows/result-driven-test"
+
+# resource_path: "eosuser.cern.ch//eos/user/l/lreichen/DetPerformanceWorkflows/result-driven-test"
 
 geometry_path: "$K4GEO/FCCee/CLD/compact/CLD_o2_v07/CLD_o2_v07.xml"
 steering_path: "$CLDCONFIG/share/CLDConfig/cld_steer.py"

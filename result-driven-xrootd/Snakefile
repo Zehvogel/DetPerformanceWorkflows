@@ -18,7 +18,7 @@ rule neutral_resolution_plot_E:
     output:
         "<results>/plots/{particle}_{n_events}N/neutral_energy_resolution.pdf"
     input:
-        storage.xrootd(expand("<resources>/ntuples/{{particle}}_{energy}_cosTheta_{{n_events}}N.root", energy=config["neutral_resolution_plot_E"]["energies"]))
+        storage.xrootd(expand("root://<resources>/ntuples/{particle}_{energy}_cosTheta_{n_events}N.root", energy=config["neutral_resolution_plot_E"]["energies"], allow_missing=True))
     # FIXME: there must be a better way to handle this!
     params:
         input_path=lambda wildcards, input: Path(input[0]).parent,
@@ -39,9 +39,9 @@ python plots.py \
 
 rule ntuple:
     output:
-        storage.xrootd("<resources>/ntuples/{particle}_{energy}_cosTheta_{n_events}N.root")
+        storage.xrootd("root://<resources>/ntuples/{particle}_{energy}_cosTheta_{n_events}N.root")
     input:
-        storage.xrootd("<resources>/reco/{particle}_{energy}_cosTheta_{n_events}N_REC.edm4hep.root")
+        storage.xrootd("root://<resources>/reco/{particle}_{energy}_cosTheta_{n_events}N_REC.edm4hep.root")
     # TODO: add stuff that actually runs
     shell:
         f"""
@@ -51,9 +51,9 @@ k4run {config["n_tuple_config"]} --inputFiles {{input}} --output {{output}} -n -
 
 rule reco:
     output:
-        storage.xrootd("<resources>/reco/{particle}_{energy}_cosTheta_{n_events}N_REC.edm4hep.root")
+        storage.xrootd("root://<resources>/reco/{particle}_{energy}_cosTheta_{n_events}N_REC.edm4hep.root")
     input:
-        storage.xrootd("<resources>/sim/{particle}_{energy}_cosTheta_{n_events}N.edm4hep.root")
+        storage.xrootd("root://<resources>/sim/{particle}_{energy}_cosTheta_{n_events}N.edm4hep.root")
     params:
         base_name=lambda wildcards, output: output[0].removesuffix("_REC.edm4hep.root")
     shell:
@@ -70,7 +70,7 @@ popd
 
 rule sim:
     output:
-        storage.xrootd("<resources>/sim/{particle}_{energy}_cosTheta_{n_events}N.edm4hep.root")
+        storage.xrootd("root://<resources>/sim/{particle}_{energy}_cosTheta_{n_events}N.edm4hep.root")
     shell:
         # TODO: make introduce a geometry name to look up the geometry path from a dict and use the geometry name also as a parameter so that it is possible to generate geometry comparison plots with this
         f"""
