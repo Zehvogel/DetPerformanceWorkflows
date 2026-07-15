@@ -1,0 +1,22 @@
+neutral_resolution_plot_E:
+  energies: [5., 10., 20., 50., 100.]
+  n_bins: 30
+
+plot_list: [
+  "gamma_1000N/neutral_energy_resolution.pdf",
+  "kaon0L_1000N/neutral_energy_resolution.pdf",
+  ]
+
+pathvars:
+  results: "/home/lreichen/work/DetPerformanceWorkflows/result-driven-xrootd"
+  resources: "root://eosuser.cern.ch//eos/user/l/lreichen/DetPerformanceWorkflows/result-driven-test"
+
+geometry_path: "$K4GEO/FCCee/CLD/compact/CLD_o2_v07/CLD_o2_v07.xml"
+steering_path: "$CLDCONFIG/share/CLDConfig/cld_steer.py"
+
+# FIXME: once pandora can run from anywhere get rid of this
+# reco_config_path: "$CLDCONFIG/share/CLDConfig/CLDReconstruction.py"
+reco_run_path: "$CLDCONFIG/share/CLDConfig/"
+reco_config_name: "CLDReconstruction.py"
+
+n_tuple_config: "/home/lreichen/work/k4Performance/PFlowValidation/options/runPFONTuple.py"
