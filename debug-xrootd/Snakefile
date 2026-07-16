@@ -1,0 +1,11 @@
+storage:
+    provider="xrootd",
+    retrieve=False
+
+
+rule all:
+    input: storage.xrootd("root://eosuser.cern.ch//eos/user/l/lreichen/test.txt")
+
+rule test:
+    output: storage.xrootd("root://eosuser.cern.ch//eos/user/l/lreichen/test.txt", retrieve=True)
+    shell: "echo {output} && touch {output}"
