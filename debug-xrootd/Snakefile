@@ -4,8 +4,21 @@ storage:
 
 
 rule all:
-    input: storage.xrootd("root://eosuser.cern.ch//eos/user/l/lreichen/test.txt")
+    input: storage.xrootd("root://eosuser.cern.ch//eos/user/l/lreichen/test_snakemake/test_processed.txt")
+
+rule process_test:
+    # https://github.com/snakemake/snakemake/issues/3996
+    # input: storage.xrootd("root://eosuser.cern.ch//eos/user/l/lreichen/test_snakemake/test.txt", retrieve=True)
+    input: storage.xrootd("root://eosuser.cern.ch//eos/user/l/lreichen/test_snakemake/test.txt")
+    output: storage.xrootd("root://eosuser.cern.ch//eos/user/l/lreichen/test_snakemake/test_processed.txt", retrieve=True)
+    shell: """
+    echo input: {input}
+    echo output: {output}
+    xrdcp {input} tmp
+    mv tmp {output}
+    """
 
 rule test:
-    output: storage.xrootd("root://eosuser.cern.ch//eos/user/l/lreichen/test.txt", retrieve=True)
+    # output: storage.xrootd("root://eosuser.cern.ch//eos/user/l/lreichen/test_snakemake/test.txt", retrieve=True, keep_local=True)
+    output: storage.xrootd("root://eosuser.cern.ch//eos/user/l/lreichen/test_snakemake/test.txt", retrieve=True)
     shell: "echo {output} && touch {output}"
