@@ -1,10 +1,10 @@
 neutral_resolution_plot_E:
   energies: [5., 10., 20., 50., 100.]
-  n_bins: 3
+  n_bins: 30
 
 plot_list: [
-  "gamma_10N/neutral_energy_resolution.pdf",
-  "kaon0L_10N/neutral_energy_resolution.pdf",
+  "gamma_10000N/neutral_energy_resolution.pdf",
+  "kaon0L_10000N/neutral_energy_resolution.pdf",
   ]
 
 pathvars:

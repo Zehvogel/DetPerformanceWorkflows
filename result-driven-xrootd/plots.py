@@ -103,16 +103,12 @@ for region, region_frames in region_dfs.items():
         low_bin = means[region][k] - 3 * stds[region][k]
         high_bin = means[region][k] + 3 * stds[region][k]
         bin_width = (high_bin - low_bin) / n_bins
-        h = df.Histo1D(("", ";E_{REC} - E_{MC}", n_bins, low_bin, high_bin), "delta_E")
 
-        # f = ROOT.TF1(f"f_delta_E_{k}", "gausn", low_bin, high_bin)
-        # instead of gausn, the below returns a useful amplitude while keeping the correlation with the width
-        f = ROOT.TF1(f"f_delta_E_{region}_{k}", "[0]*exp(-0.5*((x-[1])/[2])**2/[2])", low_bin, high_bin)
+        h = df.Histo1D(("", f"{region};E_{{REC}} - E_{{MC}}", n_bins, low_bin, high_bin), "delta_E")
+        f = ROOT.TF1(f"f_delta_E_{k}", "gaus", low_bin, high_bin)
 
-        scale = counts[region][k] * bin_width / (np.sqrt(2* np.pi))
-
-        f.SetParameters(scale, means[region][k], stds[region][k])
         h.Fit(f, "L")
+
         sigma_E[region].append(f.GetParameter(2))
         means_E[region].append(f.GetParameter(1))
 
@@ -127,6 +123,16 @@ for region, region_histos in histos.items():
         h.Draw()
         c.Draw()
         canvs[region][k] = c
+
+# store slices for debugging
+for region, region_canvs in canvs.items():
+    for i, c in enumerate(region_canvs.values()):
+        if i == 0:
+            c.SaveAs(str(plot_path / f"neutral_energy_resolution_{region}.pdf("))
+        elif i == len(region_canvs) - 1:
+            c.SaveAs(str(plot_path / f"neutral_energy_resolution_{region}.pdf)"))
+        else:
+            c.SaveAs(str(plot_path / f"neutral_energy_resolution_{region}.pdf"))
 
 # energy resolution plot
 mg_res_E = ROOT.TMultiGraph()
