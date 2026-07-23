@@ -16,6 +16,8 @@ parser.add_argument("--particle", action="store", type=str, help="Particle type 
 parser.add_argument("--n_bins", action="store", type=int, help="Number of bins for the histograms", default=30)
 parser.add_argument("--n_threads", action="store", type=int, help="Number of threads to use for parallel processing", default=1)
 parser.add_argument("--batch", action="store_true", help="Run in batch mode (no GUI)")
+parser.add_argument("--y_max", action="store", type=float, help="Maximum y-axis value for the plots", default=None)
+parser.add_argument("--y_min", action="store", type=float, help="Minimum y-axis value for the plots", default=None)
 args = parser.parse_args()
 
 # energies = [5., 10., 20., 50., 100.]
@@ -49,13 +51,13 @@ deg = np.pi / 180
 # TODO: should probably be made configurable
 regions = {
     "barrel": f"true_theta > {50*deg} && true_theta < {130*deg}",
-    "endcap": f"(true_theta > {15*deg} && true_theta < {40*deg}) || (true_theta > {140*deg} && true_theta < {165*deg})",
     "transition": f"(true_theta > {40*deg} && true_theta < {50*deg}) || (true_theta > {130*deg} && true_theta < {140*deg})",
+    "endcap": f"(true_theta > {15*deg} && true_theta < {40*deg}) || (true_theta > {140*deg} && true_theta < {165*deg})",
 }
 legend_map = {
     "barrel": "Barrel (50#circ < #theta < 130#circ)",
-    "endcap": "Endcap (15#circ < #theta < 40#circ)",
     "transition": "Transition (40#circ < #theta < 50#circ)",
+    "endcap": "Endcap (15#circ < #theta < 40#circ)",
 }
 
 colls = {region: {} for region in regions}
@@ -65,6 +67,12 @@ for k, df in dfs.items():
     df = df.Filter("mc_genStatus == 1")
     df = df.Filter("has_cluster")
     df = df.Define("true_theta", "std::atan2(std::hypot(mc_Px, mc_Py), mc_Pz)")
+    # df = df.Define("true_phi", "std::atan2(mc_Px, mc_Py)")
+    # df = df.Define("reco_theta", "std::atan2(std::hypot(pfo_Px, pfo_Py), pfo_Pz)")
+    # df = df.Define("reco_phi", "std::atan2(pfo_Px, pfo_Py)")
+    # df = df.Define("delta_theta", "reco_theta - true_theta")
+    # df = df.Define("delta_phi", "double delta = reco_phi - true_phi; if (delta > M_PI) delta -= 2*M_PI; else if (delta < -M_PI) delta += 2*M_PI; return delta;")
+    # df = df.Filter("abs(delta_theta) < 0.002 && abs(delta_phi) < 0.001")
     df = df.Define("delta_E", "pfo_E - mc_E")
     for region, region_cut in regions.items():
         region_df = df.Filter(region_cut)
@@ -136,20 +144,30 @@ for region, region_canvs in canvs.items():
 
 # energy resolution plot
 mg_res_E = ROOT.TMultiGraph()
-l = ROOT.TLegend(0.7, 0.7, 1., 1.)
+# l = ROOT.TLegend(0.7, 0.7, 1., 1.)
+l = ROOT.TLegend(0.5, 0.58, 0.95, 0.88)
 for i, (region, region_sigmas) in enumerate(sigma_E.items()):
     energies = np.array(energies, dtype=np.float64)
-    resolutions = np.array(region_sigmas, dtype=np.float64) / energies
+    resolutions = np.array(region_sigmas, dtype=np.float64) / energies * 100.0
     g = ROOT.TGraph(len(energies), energies, resolutions)
     g.SetLineColor(ROOT.kP6Blue + i)
     g.SetMarkerColor(ROOT.kP6Blue + i)
-    l.AddEntry(g, legend_map[region], "lp")
+    g.SetMarkerStyle(53+i)
+    g.SetMarkerSize(1.25)
+    l.AddEntry(g, legend_map[region], "p")
     mg_res_E.Add(g)
 
-c_res_E = ROOT.TCanvas()
+c_res_E = ROOT.TCanvas("", "", 550, 500)
 mg_res_E.SetMinimum(0.0)
-mg_res_E.Draw("A LP")
-mg_res_E.SetTitle(";E_{MC} [GeV];#sigma(E_{REC} - E_{MC}) / E_{MC}")
+mg_res_E.Draw("A P")
+mg_res_E.SetTitle(";E_{MC} [GeV];#sigma(E_{REC} - E_{MC}) / E_{MC} [%]")
+if args.y_max is not None:
+    mg_res_E.SetMaximum(args.y_max)
+if args.y_min is not None:
+    mg_res_E.SetMinimum(args.y_min)
+mg_res_E.GetYaxis().SetTitleOffset(0.)
+c_res_E.SetRightMargin(0.01)
+c_res_E.SetLeftMargin(0.155)
 l.Draw()
 c_res_E.Draw()
 c_res_E.SaveAs(str(plot_path / "neutral_energy_resolution.pdf"))
